@@ -1,4 +1,4 @@
-import promiseMiddleware from '../src';
+import promiseMiddleware, { createPromiseMiddleware } from '../src';
 
 function noop() {}
 
@@ -93,5 +93,64 @@ describe('promiseMiddleware', () => {
       'here you go',
       'here you go'
     ]);
+  });
+});
+
+describe('createPromiseMiddleware', () => {
+  let baseDispatch;
+  let dispatch;
+  let foobar;
+  let err;
+
+  beforeEach(() => {
+    baseDispatch = jest.fn();
+    dispatch = function dispatch(action) {
+      const methods = { dispatch, getState: noop };
+      return metaMiddleware()(
+        createPromiseMiddleware(true)(methods)(baseDispatch)
+      )(action);
+    };
+    foobar = { foo: 'bar' };
+    err = new Error();
+  });
+
+  it('handles Flux standard actions', async () => {
+    await dispatch({
+      type: 'ACTION_TYPE',
+      payload: Promise.resolve(foobar)
+    });
+
+    expect(baseDispatch).toHaveBeenCalledTimes(2);
+    expect(baseDispatch.mock.calls[0][0]).toEqual({
+      type: 'ACTION_TYPE',
+      loading: true
+    });
+    expect(baseDispatch.mock.calls[1][0]).toEqual({
+      type: 'ACTION_TYPE',
+      payload: foobar
+    });
+
+    await dispatch({
+      type: 'ACTION_TYPE',
+      payload: Promise.reject(err)
+    }).catch(noop);
+
+    expect(baseDispatch).toHaveBeenCalledTimes(4);
+    expect(baseDispatch.mock.calls[2][0]).toEqual({
+      type: 'ACTION_TYPE',
+      loading: true
+    });
+    expect(baseDispatch.mock.calls[3][0]).toEqual({
+      type: 'ACTION_TYPE',
+      payload: err,
+      error: true
+    });
+
+    await expect(
+      dispatch({
+        type: 'ACTION_TYPE',
+        payload: Promise.reject(err).catch(noop)
+      })
+    ).rejects;
   });
 });
