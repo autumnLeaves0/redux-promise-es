@@ -1,8 +1,5 @@
-module.exports = {
-  transform: {
-    '^.+\\.js$': 'babel-jest'
-  },
-  transformIgnorePatterns: ['<rootDir>/node_modules/(?!(.+lodash-es))'],
+export default {
+  transform: {},
   collectCoverage: true,
   coverageThreshold: {
     './src/index.js': {

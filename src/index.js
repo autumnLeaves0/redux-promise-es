@@ -1,8 +1,6 @@
 import isPromise from 'is-promise';
 import { isFSA, isError } from './flux-standard-action';
 
-export { isFSA, isError };
-
 export function createPromiseMiddleware(dispatchLoading) {
   return function promiseMiddleware({ dispatch }) {
     return next => action => {
@@ -28,5 +26,7 @@ export function createPromiseMiddleware(dispatchLoading) {
     };
   };
 }
+const promiseMiddleware = createPromiseMiddleware(false);
 
-export default createPromiseMiddleware(false);
+export { isFSA, isError, promiseMiddleware };
+export default promiseMiddleware;

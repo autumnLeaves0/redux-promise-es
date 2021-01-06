@@ -1,4 +1,5 @@
 import promiseMiddleware, { createPromiseMiddleware } from '../src';
+import { jest } from '@jest/globals';
 
 function noop() {}
 
